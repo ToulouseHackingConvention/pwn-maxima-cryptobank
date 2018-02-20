@@ -12,17 +12,20 @@ export: build
 	docker run --rm --entrypoint cat $(IMG) /lib/x86_64-linux-gnu/libc.so.6 > export/libc.so.6
 	chmod +x export/libc.so.6
 
-up: build
+run:
 	docker run -d -p 5555:5555 --name $(CTN) $(IMG)
 
-down:
-	-docker rm -f $(CTN)
+stop:
+	-docker stop $(CTN)
 
 logs:
-	docker logs -f $(CTN)
+	-docker logs -f $(CTN)
 
-clean: down
-	-docker rmi $(IMG)
+clean: stop
+	-docker rm $(CTN)
 	rm -rf export
 
-.PHONY: build export up down logs clean
+clean-all:
+	-docker rmi $(IMG)
+
+.PHONY: build run logs stop export clean clean-all
