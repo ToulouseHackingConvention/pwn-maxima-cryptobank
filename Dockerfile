@@ -9,11 +9,11 @@ RUN apt-get update && \
 
 RUN useradd \
       --shell /bin/nologin \
-      --home-dir /srv \
+      --home-dir / \
       chall
 
 ADD src/cryptobank.c /srv/cryptobank.c
-ADD src/flag /srv/flag
+ADD src/flag /flag
 
 # compile cryptobank.c
 RUN clang-5.0 \
@@ -23,12 +23,13 @@ RUN clang-5.0 \
       -fno-sanitize-recover=undefined,integer,nullability \
       -fsanitize=address \
       -fsanitize-address-use-after-scope \
-      -O2 \
+      -O1 \
       /srv/cryptobank.c \
       -o /srv/cryptobank
 
 # clean-up
-RUN rm -f /srv/cryptobank.c && \
+RUN chmod 444 /flag && \
+    rm -f /srv/cryptobank.c && \
     apt-get purge -y --auto-remove clang-5.0
 
 EXPOSE 5555

@@ -172,9 +172,9 @@ static UserAction user_action() {
     fputs("> ", stdout);
     fflush(stdout);
 
-    scanf("%s", input);  // XXX: stack buffer overflow
+    scanf("%s", input);
     int n = atoi(input);
-    return (UserAction)n;  // XXX: can be an invalid choice
+    return (UserAction)n;
 }
 
 static void user_statement(Account* account) {
@@ -208,7 +208,7 @@ static void user_transfer(Account* account) {
 
     fputs("Username of recipient: ", stdout);
     fflush(stdout);
-    scanf("%s", username);  // XXX: stack buffer overflow
+    scanf("%s", username);
 
     fputs("Amount: ", stdout);
     fflush(stdout);
@@ -219,13 +219,12 @@ static void user_transfer(Account* account) {
     fflush(stdout);
     getchar();  // read '\n'
     fgets(comment, 30, stdin);
-    comment[strlen(comment) - 1] = '\0';  // remove '\n'
+    comment[strlen(comment) - 1] = '\0';  // remove extra '\n'
 
     Account* recipient = find_account(username);
 
-    account->balance = account->balance - amount;  // XXX: integer underflow
-    recipient->balance =
-        recipient->balance + amount;  // XXX: null pointer dereference
+    account->balance = account->balance - amount;
+    recipient->balance = recipient->balance + amount;
 
     Transaction tr = {.src = account,
                       .dest = recipient,
@@ -251,7 +250,7 @@ static void user_set_favorite_recipient(Account* account) {
 
     fputs("Username of your favorite recipient: ", stdout);
     fflush(stdout);
-    scanf("%s", username);  // XXX: stack buffer overflow
+    scanf("%s", username);
 
     Account* recipient = find_account(username);
     account->favorite_recipient = recipient;
@@ -282,10 +281,10 @@ static void user_transfert_favorite_recipient(Account* account) {
     fflush(stdout);
     getchar();  // read '\n'
     fgets(comment, 30, stdin);
-    comment[strlen(comment) - 1] = '\0';  // remove '\n'
+    comment[strlen(comment) - 1] = '\0';  // remove extra '\n'
 
-    account->balance = account->balance - amount;      // XXX: integer underflow
-    recipient->balance = recipient->balance + amount;  // XXX: use-after-free
+    account->balance = account->balance - amount;
+    recipient->balance = recipient->balance + amount;
 
     Transaction tr = {.src = account,
                       .dest = recipient,
@@ -313,12 +312,11 @@ static void user_update_transaction_comment(Account* account) {
                tr->src->username, tr->dest->username, tr->amount, tr->comment);
     }
 
-    int index;
+    size_t index;
     fputs("\nIndex of transaction: ", stdout);
     fflush(stdout);
-    scanf("%d", &index);
+    scanf("%zu", &index);
 
-    index = index % account->transactions.size;  // XXX: can still be negative..
     Transaction* transaction = &account->transactions.ptr[index];
     char* comment = transaction->comment;
 
@@ -326,7 +324,7 @@ static void user_update_transaction_comment(Account* account) {
     fflush(stdout);
     getchar();  // read '\n'
     fgets(comment, 30, stdin);
-    comment[strlen(comment) - 1] = '\0';  // remove '\n'
+    comment[strlen(comment) - 1] = '\0';  // remove extra '\n'
 
     puts("Comment updated successfully.\n");
 }
@@ -387,9 +385,9 @@ static GuestAction guest_action() {
     fputs("> ", stdout);
     fflush(stdout);
 
-    scanf("%s", input);  // XXX: stack buffer overflow
+    scanf("%s", input);
     int n = atoi(input);
-    return (GuestAction)n;  // XXX: can be an invalid choice
+    return (GuestAction)n;
 }
 
 static void guest_login() {
@@ -405,12 +403,12 @@ static void guest_login() {
     fputs("Username: ", stdout);
     fflush(stdout);
 
-    scanf("%s", username);  // XXX: stack buffer overflow
+    scanf("%s", username);
 
     fputs("Password: ", stdout);
     fflush(stdout);
 
-    scanf("%s", password);  // XXX: stack buffer overflow
+    scanf("%s", password);
 
     Account* account = login(username, password);
 
@@ -436,13 +434,13 @@ static void guest_create_account() {
     fflush(stdout);
 
     char* username = (char*)malloc(sizeof(char) * 30);
-    scanf("%s", username);  // XXX: heap buffer overflow
+    scanf("%s", username);
 
     fputs("Password: ", stdout);
     fflush(stdout);
 
     char* password = (char*)malloc(sizeof(char) * 30);
-    scanf("%s", password);  // XXX: heap buffer overflow
+    scanf("%s", password);
 
     fputs(
         "\n"
