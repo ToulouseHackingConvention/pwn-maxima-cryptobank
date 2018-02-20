@@ -10,7 +10,8 @@ Hello Sir,
 I work for the US Government. I have reasons to believe that the THC Crypto Bank
 is conducting illegal activities. And they don't pay their taxes..
 
-They told me you helped us in the past. Could you hack them for me?
+One of my coworkers told me you helped us in the past.
+Could you do something for me? Break into their server or something?
 
 If it can help, I heard they use some top-notch security tool..
 
