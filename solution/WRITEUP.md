@@ -39,16 +39,16 @@ Let's see a non-exhaustive list of bugs:
 
 There is also a use-after-free: if you trigger a `realloc()` in `add_account()`, the `Account* src` and `Account* dest` pointers in transaction structures are not updated, and they become dangling pointers. Unfortunately, ASAN is able to catch it!
 
-The only bug that ASAN does not catch correctly is [line 320](../src/cryptobank.c#L320), the variable `index` is controlled by the user, and can produce a heap buffer overflow. This is because ASAN uses "red zones" to catch buffer overflows. ASAN adds a space before and after each memory block, and triggers whenever we read or write on these bytes. By choosing a specific `index`, we can manager to read or write in another block, thus not triggering ASAN. And this is how we bypass ASAN!
+The only bug that ASAN does not catch correctly is [line 320](../src/cryptobank.c#L320), the variable `index` is controlled by the user, and can produce a heap buffer overflow. This is because ASAN uses "red zones" to catch buffer overflows. ASAN adds a space before and after each memory block, and triggers whenever we read or write on these bytes. By choosing a specific `index`, we can manage to read or write in another valid memory block, thus not triggering ASAN. And this is how we bypass ASAN!
 
 The source code is equivalent to:
 ```
 fgets(account->transactions.ptr[index].comment, 30, stdin);
 ```
 
-With basic math, you can choose `index` so that `account->transactions.ptr[index].comment` points to a valid block.
+With basic math, you can choose `index` so that `account->transactions.ptr[index].comment = account->transactions.ptr + index * 32 + 16` points to a valid block.
 
-In [my solution](exploit.py), I chose `index = 10737418244` so `comment = accounts.ptr[2].transactions.ptr`. I can overwrite the `Transaction` structure of the third account.
+In [my solution](exploit.py), I chose `index = 10737418244` so that `comment = accounts.ptr[2].transactions.ptr`. I can overwrite the `Transaction` structure of the third account.
 
 The `Transaction` structure is:
 ```
@@ -60,6 +60,7 @@ typedef struct {
 } Transaction;
 ```
 
-We can easily get a **read-write-everywhere** from here. I chose to overwrite the `comment` pointer. To read the `comment`, I ask the program to show me my transactions (with option 1). To write, I ask the program to update the comment of an existing transaction (option 5).
+We can easily get a **read-write-everywhere** from here. I chose to overwrite the `comment` field. To read the `comment`, I ask the program to show me my transactions (with option 1). To write, I ask the program to update the comment of an existing transaction (option 5).
 
-Now, this is classic exploit. Note that ASAN makes addresses deterministic (ie, no PIE). I just leak the GOT, I replace `fgets` by `system`, and then I get a shell!
+Now, this is classic exploitation. Note that ASAN makes addresses deterministic (ie, no PIE), this is too easy..
+I just leak the GOT, I replace `fgets` by `system`, and then I get a shell!
