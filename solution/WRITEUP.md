@@ -60,6 +60,6 @@ typedef struct {
 } Transaction;
 ```
 
-We can easily get a **read-write-everywhere** from here. I use this to overwrite the `comment` pointer. To read the `comment`, I ask the program to show me my transactions (with option 1). To write, I ask the program to update the comment of an existing transaction (option 5).
+We can easily get a **read-write-everywhere** from here. I chose to overwrite the `comment` pointer. To read the `comment`, I ask the program to show me my transactions (with option 1). To write, I ask the program to update the comment of an existing transaction (option 5).
 
 Now, this is classic exploit. Note that ASAN makes addresses deterministic (ie, no PIE). I just leak the GOT, I replace `fgets` by `system`, and then I get a shell!
