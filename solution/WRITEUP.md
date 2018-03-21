@@ -2,7 +2,7 @@
 
 The program allows users to create accounts and make transactions between them.
 
-The C code is compiled with Clang [Address Sanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) and [Undefined Behavior Sanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html), thus adding tons of runtime checks to catch most undefined behaviors (ie, bugs). The flags I used to compile the source code are available [here](../Dockerfile#L19)
+The C code is compiled with Clang [Address Sanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) and [Undefined Behavior Sanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html), thus adding tons of runtime checks to catch most undefined behaviors (i.e, bugs). The flags I used to compile the source code are available [here](../Dockerfile#L19).
 
 The program contains lots of bugs, and most of them are caught by the sanitizers, thus making them impossible to exploit! A challenger would probably spend most of its time trying to exploit different bugs, and watch ASAN catch them, with either admiration or frustration ;)
 
@@ -37,16 +37,16 @@ Let's see a non-exhaustive list of bugs:
 * [cryptobank.c#L437](../src/cryptobank.c#L437): Heap buffer overflow due to scanf("%s") (caught by ASAN)
 * [cryptobank.c#L443](../src/cryptobank.c#L443): Heap buffer overflow due to scanf("%s") (caught by ASAN)
 
-There is also a use-after-free: if you trigger a realloc in `add_account()`, the `Account* src` and `Account* dest` pointers in transaction structures are not updated, and they become dangling pointers. Unfortunately, ASAN is able to catch it!
+There is also a use-after-free: if you trigger a `realloc()` in `add_account()`, the `Account* src` and `Account* dest` pointers in transaction structures are not updated, and they become dangling pointers. Unfortunately, ASAN is able to catch it!
 
-The only bug that ASAN does not catch correctly is [line 320](../src/cryptobank.c#L320), the variable `index` is controlled by the user, and can produce a heap buffer overflow. This is because ASAN uses "red zones" to catch buffer overflows. ASAN adds a space before and after each memory block, and triggers whenever we read or write on these bytes. By chosing a specific `index`, we can manager to read or write in another block, thus not triggering ASAN. And this is how we bypass ASAN!
+The only bug that ASAN does not catch correctly is [line 320](../src/cryptobank.c#L320), the variable `index` is controlled by the user, and can produce a heap buffer overflow. This is because ASAN uses "red zones" to catch buffer overflows. ASAN adds a space before and after each memory block, and triggers whenever we read or write on these bytes. By choosing a specific `index`, we can manager to read or write in another block, thus not triggering ASAN. And this is how we bypass ASAN!
 
 The source code is equivalent to:
 ```
 fgets(account->transactions.ptr[index].comment, 30, stdin);
 ```
 
-With basic math, you can chose `index` so that `account->transactions.ptr[index].comment` points to a valid block.
+With basic math, you can choose `index` so that `account->transactions.ptr[index].comment` points to a valid block.
 
 In [my solution](exploit.py), I chose `index = 10737418244` so `comment = accounts.ptr[2].transactions.ptr`. I can overwrite the `Transaction` structure of the third account.
 
